@@ -1,0 +1,2 @@
+# affinity_arabic_text
+Affinity_Arabic_Text
