@@ -1,0 +1,5 @@
+{
+  "name": "Affinity Arabic Text Fix",
+  "description": "A tool to help users correctly display and use Arabic text in the Affinity suite of software (Designer, Photo, Publisher). It provides correctly shaped text and instructions for pasting it into your Affinity projects.",
+  "requestFramePermissions": []
+}

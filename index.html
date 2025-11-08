@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Affinity Arabic Text Fix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+      .font-tajawal {
+        font-family: 'Tajawal', sans-serif;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/client": "https://aistudiocdn.com/react-dom@^19.2.0/client",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/"
+  }
+}
+</script>
+<!-- Add Babel Standalone for in-browser JSX/TSX transformation -->
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+  <body>
+    <div id="root"></div>
+    <!-- The entire React application is now inside this script tag -->
+    <script type="text/babel" data-type="module">
+import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom/client';
+
+// === START: Translations Object ===
+const translations = {
+  ar: {
+    title: 'أداة إصلاح النص العربي لبرامج Affinity',
+    subtitle: 'تقوم هذه الأداة بمعالجة النص العربي ليعمل بشكل صحيح في البرامج التي لا تدعم اللغة العربية بالكامل مثل Affinity Designer, Photo, و Publisher.',
+    clarification: 'ملاحظة: كما يظهر في شاشة البداية الجديدة، أصبحت برامج Affinity الآن تابعة لشركة Canva.',
+    inputLabel: '١. أدخل النص العربي هنا',
+    inputPlaceholder: 'اكتب أو الصق النص هنا...',
+    outputLabel: 'النص الجاهز للنسخ',
+    outputLabel1: '٢. نص مُصحّح (جرب هذا أولاً)',
+    outputLabel2: '٣. نص مُصحّح ومعكوس (للبرامج القديمة)',
+    outputPlaceholder: 'سيظهر النص المعالج هنا...',
+    copyButton: 'نسخ النص',
+    copiedButton: 'تم النسخ!',
+    instructionsTitle: '٤. اتبع هذه الخطوات في Affinity',
+    step1: 'اكتب النص الذي تريده في المربع الأول.',
+    step2: 'انسخ النص من المربع الثاني <strong>"نص مُصحّح"</strong> وجربه في برنامج Affinity. هذا الخيار يعمل في معظم الحالات.',
+    step3: 'إذا لم يعمل الخيار الأول، ارجع وانسخ النص من المربع الثالث <strong>"نص مُصحّح ومعكوس"</strong>.',
+    step4: 'افتح برنامج Affinity، اختر أداة النص، ثم الصق النص الذي نسخته (Ctrl+V أو Cmd+V).',
+    step5: 'لضمان عدم تغير شكل النص، يمكنك تحويله إلى منحنيات (Convert to Curves) من قائمة Layer.',
+    footer: 'صُنع بحب للمصممين العرب.',
+  },
+  en: {
+    title: 'Affinity Arabic Text Fix Tool',
+    subtitle: 'This tool processes Arabic text to work correctly in applications that lack full Arabic support, like Affinity Designer, Photo, and Publisher.',
+    clarification: 'Note: As the new splash screen shows, the Affinity suite is now by Canva.',
+    inputLabel: '1. Enter Arabic Text Here',
+    inputPlaceholder: 'Type or paste your text here...',
+    outputLabel: 'Ready-to-Copy Text',
+    outputLabel1: '2. Corrected Text (Try This First)',
+    outputLabel2: '3. Corrected & Reversed Text (For Older Software)',
+    outputPlaceholder: 'Processed text will appear here...',
+    copyButton: 'Copy Text',
+    copiedButton: 'Copied!',
+    instructionsTitle: '4. Follow These Steps in Affinity',
+    step1: 'Type your desired text into the first box.',
+    step2: 'Copy the text from the second box <strong>"Corrected Text"</strong> and try it in Affinity. This works in most cases.',
+    step3: 'If the first option doesn\'t work, come back and copy the text from the third box <strong>"Corrected & Reversed Text"</strong>.',
+    step4: 'Open your Affinity application, select a text tool, and then paste the text you copied (Ctrl+V or Cmd+V).',
+    step5: 'To ensure the text shape is permanent, you can convert it to curves via the Layer > Convert to Curves menu.',
+    footer: 'Made with ❤️ for Arab designers.',
+  },
+};
+// === END: Translations Object ===
+
+
+// === START: CopyButton Component ===
+const CopyButton = ({ textToCopy, translations }) => {
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleCopy = async () => {
+    if (!textToCopy) return;
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      disabled={!textToCopy}
+      className={`px-4 py-2 text-sm font-semibold rounded-md transition-all duration-200 ease-in-out flex items-center gap-2
+        ${isCopied 
+          ? 'bg-green-500 text-white' 
+          : 'bg-blue-500 text-white hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed'
+        }`}
+    >
+      {isCopied ? (
+        <>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+          </svg>
+          {translations.copiedButton}
+        </>
+      ) : (
+        <>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+            <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+          </svg>
+          {translations.copyButton}
+        </>
+      )}
+    </button>
+  );
+};
+// === END: CopyButton Component ===
+
+
+// === START: Instructions Component ===
+const Instructions = ({ translations }) => {
+  const steps = [
+    translations.step1,
+    translations.step2,
+    translations.step3,
+    translations.step4,
+    translations.step5,
+  ];
+
+  return (
+    <div className="mt-10 pt-6 border-t border-gray-200">
+      <h2 className="text-2xl font-bold text-gray-800 mb-4">{translations.instructionsTitle}</h2>
+      <div className="space-y-4">
+        {steps.map((step, index) => (
+          <div key={index} className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold">
+              {index + 1}
+            </div>
+            <p className="text-gray-700 text-base leading-relaxed" dangerouslySetInnerHTML={{ __html: step }}></p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+// === END: Instructions Component ===
+
+
+// === START: Header Component ===
+const LanguageSwitcher = ({ lang, setLang }) => (
+  <button
+    onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
+    className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-100 rounded-md hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+  >
+    {lang === 'ar' ? 'Switch to English' : 'التحويل إلى العربية'}
+  </button>
+);
+
+const Header = ({ lang, setLang, translations }) => {
+  return (
+    <header className="text-center">
+      <div className="flex justify-center items-center gap-4 mb-4">
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-800">{translations.title}</h1>
+        <LanguageSwitcher lang={lang} setLang={setLang} />
+      </div>
+      <p className="text-lg text-gray-600 max-w-3xl mx-auto">{translations.subtitle}</p>
+      <p className="mt-2 text-sm text-gray-500 bg-yellow-100 border border-yellow-300 rounded-md p-2 inline-block">
+        {translations.clarification}
+      </p>
+    </header>
+  );
+};
+// === END: Header Component ===
+
+
+// === START: Main App Component ===
+const App = () => {
+  // --- Arabic Shaping Logic ---
+  const arabicGlyphs = {
+    'ء': ['\uFE80'], 'آ': ['\uFE81', '\uFE82'], 'أ': ['\uFE83', '\uFE84'], 'ؤ': ['\uFE85', '\uFE86'], 'إ': ['\uFE87', '\uFE88'], 'ئ': ['\uFE89', '\uFE8A', '\uFE8B', '\uFE8C'], 'ا': ['\uFE8D', '\uFE8E'], 'ب': ['\uFE8F', '\uFE90', '\uFE91', '\uFE92'], 'ة': ['\uFE93', '\uFE94'], 'ت': ['\uFE95', '\uFE96', '\uFE97', '\uFE98'], 'ث': ['\uFE99', '\uFE9A', '\uFE9B', '\uFE9C'], 'ج': ['\uFE9D', '\uFE9E', '\uFE9F', '\uFEA0'], 'ح': ['\uFEA1', '\uFEA2', '\uFEA3', '\uFEA4'], 'خ': ['\uFEA5', '\uFEA6', '\uFEA7', '\uFEA8'], 'د': ['\uFEA9', '\uFEAA'], 'ذ': ['\uFEAB', '\uFEAC'], 'ر': ['\uFEAD', '\uFEAE'], 'ز': ['\uFEAF', '\uFEB0'], 'س': ['\uFEB1', '\uFEB2', '\uFEB3', '\uFEB4'], 'ش': ['\uFEB5', '\uFEB6', '\uFEB7', '\uFEB8'], 'ص': ['\uFEB9', '\uFEBA', '\uFEBB', '\uFEBC'], 'ض': ['\uFEBD', '\uFEBE', '\uFEBF', '\uFEC0'], 'ط': ['\uFEC1', '\uFEC2', '\uFEC3', '\uFEC4'], 'ظ': ['\uFEC5', '\uFEC6', '\uFEC7', '\uFEC8'], 'ع': ['\uFEC9', '\uFECA', '\uFECB', '\uFECC'], 'غ': ['\uFECD', '\uFECE', '\uFECF', '\uFED0'], 'ف': ['\uFED1', '\uFED2', '\uFED3', '\uFED4'], 'ق': ['\uFED5', '\uFED6', '\uFED7', '\uFED8'], 'ك': ['\uFED9', '\uFEDA', '\uFEDB', '\uFEDC'], 'ل': ['\uFEDD', '\uFEDE', '\uFEDF', '\uFEE0'], 'م': ['\uFEE1', '\uFEE2', '\uFEE3', '\uFEE4'], 'ن': ['\uFEE5', '\uFEE6', '\uFEE7', '\uFEE8'], 'ه': ['\uFEE9', '\uFEEA', '\uFEEB', '\uFEEC'], 'و': ['\uFEED', '\uFEEE'], 
+    'ى': ['\uFEEF', '\uFEF0'], 'ي': ['\uFEF1', '\uFEF2', '\uFEF3', '\uFEF4'],
+  };
+  const ligatures = { 'لآ': ['\uFEF5', '\uFEF6'], 'لأ': ['\uFEF7', '\uFEF8'], 'لإ': ['\uFEF9', '\uFEFA'], 'لا': ['\uFEFB', '\uFEFC'] };
+  const isConnectable = (char) => char && arabicGlyphs[char] !== undefined;
+  const connectsForward = (char) => {
+    if (!char) return false;
+    const nonConnecting = ['ء', 'آ', 'أ', 'ؤ', 'إ', 'ا', 'د', 'ذ', 'ر', 'ز', 'ة', 'و', 'ى'];
+    return isConnectable(char) && !nonConnecting.includes(char);
+  };
+  const shapeArabic = (text) => {
+    let result = "";
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      const nextChar = text[i + 1];
+      if (char === 'ل' && nextChar && ['ا', 'أ', 'إ', 'آ'].includes(nextChar)) {
+        const ligatureKey = char + nextChar;
+        const glyphs = ligatures[ligatureKey];
+        const prevChar = i > 0 ? text[i - 1] : null;
+        result += connectsForward(prevChar) ? glyphs[1] : glyphs[0];
+        i++;
+        continue;
+      }
+      const glyphs = arabicGlyphs[char];
+      if (!glyphs) {
+        result += char;
+        continue;
+      }
+      const prevChar = i > 0 ? text[i - 1] : null;
+      const prevConnects = connectsForward(prevChar);
+      const nextConnects = connectsForward(char) && isConnectable(nextChar);
+      let shape = glyphs[0];
+      if (glyphs.length === 4) {
+        if (prevConnects && nextConnects) shape = glyphs[3];
+        else if (prevConnects) shape = glyphs[1];
+        else if (nextConnects) shape = glyphs[2];
+      } else if (glyphs.length === 2) {
+        if (prevConnects) shape = glyphs[1];
+      }
+      result += shape;
+    }
+    return result;
+  };
+  // --- End of Arabic Shaping Logic ---
+
+  const [lang, setLang] = useState('ar');
+  const [inputText, setInputText] = useState('');
+  const [shapedText, setShapedText] = useState('');
+  const [reversedShapedText, setReversedShapedText] = useState('');
+
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  }, [lang]);
+
+  useEffect(() => {
+    const shaped = shapeArabic(inputText);
+    setShapedText(shaped);
+    setReversedShapedText(shaped.split('').reverse().join(''));
+  }, [inputText]);
+
+  const currentTranslations = translations[lang];
+  const containerClass = lang === 'ar' ? 'font-tajawal' : '';
+
+  return (
+    <div className={`min-h-screen bg-gray-50 text-gray-800 ${containerClass}`}>
+      <div className="container mx-auto p-4 md:p-8">
+        <Header lang={lang} setLang={setLang} translations={currentTranslations} />
+        
+        <main className="mt-8 bg-white rounded-xl shadow-lg p-6 md:p-8">
+          <div className="mb-8">
+            <label htmlFor="arabic-input" className="text-lg font-semibold text-gray-700 mb-2 block">
+              {currentTranslations.inputLabel}
+            </label>
+            <textarea
+              id="arabic-input"
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder={currentTranslations.inputPlaceholder}
+              className="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out text-2xl"
+              rows={6}
+              dir="rtl" 
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-lg font-semibold text-gray-700">
+                  {currentTranslations.outputLabel1}
+                </label>
+                <CopyButton textToCopy={shapedText} translations={currentTranslations} />
+              </div>
+              <div 
+                className="w-full p-4 border border-gray-200 bg-gray-50 rounded-lg text-2xl"
+                style={{ direction: 'rtl', minHeight: '150px' }}
+                aria-live="polite"
+              >
+                {shapedText ? shapedText : <span className="text-gray-400">{currentTranslations.outputPlaceholder}</span>}
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-lg font-semibold text-gray-700">
+                  {currentTranslations.outputLabel2}
+                </label>
+                <CopyButton textToCopy={reversedShapedText} translations={currentTranslations} />
+              </div>
+              <div 
+                className="w-full p-4 border border-gray-200 bg-gray-50 rounded-lg text-2xl"
+                style={{ direction: 'ltr', minHeight: '150px' }}
+                aria-live="polite"
+              >
+                {reversedShapedText ? reversedShapedText : <span className="text-gray-400">{currentTranslations.outputPlaceholder}</span>}
+              </div>
+            </div>
+          </div>
+
+          <Instructions translations={currentTranslations} />
+        </main>
+        
+        <footer className="text-center mt-8 text-gray-500 text-sm">
+            {currentTranslations.footer}
+        </footer>
+      </div>
+    </div>
+  );
+};
+// === END: Main App Component ===
+
+
+// === START: Render Application ===
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  throw new Error("Could not find root element to mount to");
+}
+
+const root = ReactDOM.createRoot(rootElement);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+// === END: Render Application ===
+    </script>
+  </body>
+</html>
